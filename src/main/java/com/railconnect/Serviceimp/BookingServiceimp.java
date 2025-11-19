@@ -14,6 +14,7 @@ import com.railconnect.DTO.BookingRequest;
 import com.railconnect.DTO.BookingResponse;
 import com.railconnect.entities.Booking;
 import com.railconnect.entities.Coach;
+import com.railconnect.entities.PaymentStatus;
 import com.railconnect.entities.Seat;
 import com.railconnect.entities.Train;
 import com.railconnect.entities.TrainRoute;
@@ -141,7 +142,7 @@ public class BookingServiceimp implements BookingService {
 		double totalfare = faresServiceimp.calculateFare(existbooking.getId());
 
 		existbooking.setTotalFare(totalfare);
-//		existbooking.setBookingStatus("CONFIRMED");
+		existbooking.setBookingStatus("PENDING"); 
 		Train train = existbooking.getTrain();
 		bookingRepo.save(existbooking);
 

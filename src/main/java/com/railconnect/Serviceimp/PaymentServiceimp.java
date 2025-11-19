@@ -1,5 +1,6 @@
 package com.railconnect.Serviceimp;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +38,6 @@ public class PaymentServiceimp implements PaymentService {
 
 	@Autowired
 	private final RestTemplate restTemplate;
-	
 
 	private final ObjectMapper mapper = new ObjectMapper();
 
@@ -72,8 +72,7 @@ public class PaymentServiceimp implements PaymentService {
 	// Step 2: Create PayPal Order
 	@Override
 	public JsonNode createOrder(Long bookingId) throws Exception {
-		Booking booking = bookingRepo.findById(bookingId)
-				.orElseThrow(() -> new RuntimeException("Booking not found"));
+		Booking booking = bookingRepo.findById(bookingId).orElseThrow(() -> new RuntimeException("Booking not found"));
 
 		String token = getAccessToken();
 
@@ -99,35 +98,46 @@ public class PaymentServiceimp implements PaymentService {
 		payment.setPaymentMethod("UPI");
 		payment.setStatus(PaymentStatus.PENDING);
 		paymentRepo.save(payment);
-		
 
 		return json;
 	}
 
 	@Override
 	public JsonNode captureOrder(String orderId) throws Exception {
-             String token = getAccessToken();
-             
-             HttpHeaders headers = new HttpHeaders();
-             headers.setBearerAuth(token);
-             headers.setContentType(MediaType.APPLICATION_JSON);
-             
-             HttpEntity<String> entity = new HttpEntity<>("", headers);
-             
-             ResponseEntity<String> response = restTemplate.exchange(baseUrl + "/v2/checkout/orders/" + orderId + "/capture", HttpMethod.POST, entity, String.class);
-		
-         	JsonNode json = mapper.readTree(response.getBody());
+		String token = getAccessToken();
 
-    		if (json.get("status").asText().equals("COMPLETED")) {
-    			Payment payment = paymentRepo.findByPaypalOrderId(orderId)
-    					.orElseThrow(() -> new RuntimeException("Booking not found for orderId: " + orderId));
+		HttpHeaders headers = new HttpHeaders();
+		headers.setBearerAuth(token);
+		headers.setContentType(MediaType.APPLICATION_JSON);
 
-    			payment.setStatus(PaymentStatus.SUCCESS);
-    			paymentRepo.save(payment);
-    		}
+		HttpEntity<String> entity = new HttpEntity<>("", headers);
 
-    		return json;
+		ResponseEntity<String> response = restTemplate.exchange(baseUrl + "/v2/checkout/orders/" + orderId + "/capture",
+				HttpMethod.POST, entity, String.class);
+
+		JsonNode json = mapper.readTree(response.getBody());
+
+		if (json.get("status").asText().equals("COMPLETED")) {
+			Payment payment = paymentRepo.findByPaypalOrderId(orderId)
+					.orElseThrow(() -> new RuntimeException("Booking not found for orderId: " + orderId));
+
+			payment.setStatus(PaymentStatus.SUCCESS);
+			paymentRepo.save(payment);
+
+			Long bookingid = payment.getBooking().getId();
+
+			Booking booking = bookingRepo.findById(bookingid)
+					.orElseThrow(() -> new RuntimeException("Booking not found for bookingId: " + bookingid));
+
+			 // 5Update booking status = CONFIRMED
+	        booking.setBookingStatus("CONFIRMED");
+	        booking.setUpdatedAt(LocalDateTime.now());
+
+	        //Save booking
+	        bookingRepo.save(booking);
+		}
+
+		return json;
 	}
-
 
 }
