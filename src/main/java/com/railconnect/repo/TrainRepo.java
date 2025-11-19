@@ -22,5 +22,16 @@ public interface TrainRepo extends JpaRepository<Train, Long> {
 		  List<Train> findTrainsBetweenStations(@Param("fromStation") String fromStation,
 		                                             @Param("toStation") String toStation);
 
+//	@Query("SELECT DISTINCT t FROM Train t " +
+//		       "JOIN t.routes rFrom " +
+//		       "JOIN t.routes rTo " +
+//		       "WHERE rFrom.train = rTo.train " +
+//		       "AND LOWER(rFrom.stationName) = LOWER(:fromStation) " +
+//		       "AND LOWER(rTo.stationName) = LOWER(:toStation) " +
+//		       "AND rFrom.stopNumber < rTo.stopNumber " +
+//		       "AND LOWER(t.status) = 'active'")
+//		List<Train> findTrainsBetweenStations(@Param("fromStation") String fromStation,
+//		                                      @Param("toStation") String toStation);
+//
 
 }

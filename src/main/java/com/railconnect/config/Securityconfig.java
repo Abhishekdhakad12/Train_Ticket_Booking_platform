@@ -35,7 +35,8 @@ public class Securityconfig {
 			"/api/payment/**",
 //			"/api/coaches/**",
 //			 "/api/trainRoute/**",
-			"/api/fares/**"
+			"/api/fares/**",
+			"/api/payment/**"
 	};
 	
 	@Bean

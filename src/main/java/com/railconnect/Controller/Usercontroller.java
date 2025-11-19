@@ -8,8 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -63,27 +66,26 @@ public class Usercontroller {
 	@PostMapping("/login")
 	public ResponseEntity<HashMap<String, Object>> loginuser(@RequestBody Users user) {
 		HashMap<String, Object> response = new HashMap<>();
-		
-		 // Input validation
-		if(user.getEmail() == null || user.getEmail().isBlank()) {
+
+		// Input validation
+		if (user.getEmail() == null || user.getEmail().isBlank()) {
 			throw new RuntimeException("Email cannot be blank");
 		}
 		if (user.getPassword() == null || user.getPassword().isBlank()) {
-	        throw new RuntimeException("Password cannot be blank");
-	    }
-		
-		 String token = userServiceimp.loginuser(user);
-		 if ("Invalid username or password!".equals(token)) {
-		        throw new RuntimeException(token);  // GlobalExceptionHandler will handle 400/401 response
-		    }
+			throw new RuntimeException("Password cannot be blank");
+		}
 
-		 // 4️⃣ Success response
-	    response.put("token", token);
-	    response.put("message", "Login successfully");
+		String token = userServiceimp.loginuser(user);
+		if ("Invalid username or password!".equals(token)) {
+			throw new RuntimeException(token); // GlobalExceptionHandler will handle 400/401 response
+		}
+
+		// 4️⃣ Success response
+		response.put("token", token);
+		response.put("message", "Login successfully");
 		return ResponseEntity.ok(response);
 	}
 
-	
 	@GetMapping("/demo")
 	@PreAuthorize("hasRole('USER')")
 	public String demo() {
@@ -91,14 +93,34 @@ public class Usercontroller {
 	}
 
 	@GetMapping("/AllUsers")
-	@PreAuthorize("hasRole('USER')")
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<List<Users>> getallUsrs(Authentication authentication) {
-
-//			User user = (User) authentication.getPrincipal();
 
 		List<Users> user = userServiceimp.getallUser();
 
 		return ResponseEntity.ok(user);
+	}
+
+	@PutMapping("/update/{id}")
+	@PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+	public ResponseEntity<Map<String, Object>> updateUser(@PathVariable int id, @RequestBody Users user) {
+		Users updated = userServiceimp.updateUser(id, user);
+		updated.setPassword(null);
+		return ResponseEntity.ok(Map.of("message", "User updated successfully", "user", updated));
+	}
+
+	@DeleteMapping("/delete/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<Map<String, Object>> deleteUser(@PathVariable int id) {
+		String message = userServiceimp.deleteUser(id);
+		return ResponseEntity.ok(Map.of("message", message));
+	}
+	
+	@GetMapping("/get/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<Map<String, Object>> GetUSerBYId(@PathVariable int id) {
+		Users message = userServiceimp.getUserById(id);
+		return ResponseEntity.ok(Map.of("message", "User Get successfully!",  "user", message));
 	}
 
 }

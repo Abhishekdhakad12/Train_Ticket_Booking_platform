@@ -1,9 +1,13 @@
 package com.railconnect.Controller;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -48,4 +52,32 @@ public class BookingController {
 	public ResponseEntity<BookingResponse> calculateFare(@PathVariable Long BookingId ) {
 		return ResponseEntity.ok(bookingServiceimp.calculateFare(BookingId));
 	}
+	
+	@GetMapping("/getById/{bookingid}")
+	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+	public ResponseEntity<Map<String, Object>> getBookingById(
+			@PathVariable long bookingid) {
+		
+		return ResponseEntity.ok(bookingServiceimp.bookinggetById(bookingid));
+	}
+	
+	@DeleteMapping("/deleteById/{bookingid}")
+	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+	public ResponseEntity<Map<String, Object>> deleteBookingById(
+			@PathVariable long bookingid) {
+		return ResponseEntity.ok(bookingServiceimp.deletebookinggetById(bookingid));
+	}
+	
+	@PatchMapping("/cancelBooking/{bookingid}")
+	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+	public ResponseEntity<Map<String, Object>> cancelBooking(
+			@PathVariable long bookingid, HttpServletRequest httpRequest) {
+		
+		String authHeader = httpRequest.getHeader("Authorization");
+		String token = authHeader.substring(7);
+		String userEmail = jwtutil.extractUserName(token);
+		return ResponseEntity.ok(bookingServiceimp.cancelBooking(bookingid, userEmail));
+		
+	}
+	
 }

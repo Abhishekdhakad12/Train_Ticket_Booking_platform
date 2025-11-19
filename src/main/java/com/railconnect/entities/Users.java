@@ -30,6 +30,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+// Done
+
 @Entity
 @Data
 @AllArgsConstructor

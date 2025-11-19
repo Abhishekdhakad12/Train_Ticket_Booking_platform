@@ -1,5 +1,6 @@
 package com.railconnect.Serviceimp;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -60,6 +61,7 @@ public class TrainSeriviceimp implements TrainService {
 		}
 
 		train.setCreatedBy(users);
+		train.setCreatedAt(LocalDateTime.now());
 		return trainRepo.save(train);
 	}
 
@@ -118,6 +120,9 @@ public class TrainSeriviceimp implements TrainService {
 			train.setSource(updates.getSource());
 		if (updates.getDestination() != null)
 			train.setDestination(updates.getDestination());
+		if (updates.getUpdatedAt() != null)
+			train.setUpdatedAt(LocalDateTime.now());
+		 
 
 		train.setUpdatedBy(users);
 

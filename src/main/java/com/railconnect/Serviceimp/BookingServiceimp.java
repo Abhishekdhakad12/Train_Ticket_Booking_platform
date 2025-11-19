@@ -3,7 +3,9 @@ package com.railconnect.Serviceimp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,8 +33,10 @@ public class BookingServiceimp implements BookingService {
 
 	@Autowired
 	private BookingRepo bookingRepo;
+
 	@Autowired
 	private UserRepo userRepo;
+
 	@Autowired
 	private TrainRepo trainRepo;
 
@@ -44,6 +48,7 @@ public class BookingServiceimp implements BookingService {
 
 	@Autowired
 	private CoachRepo coachRepo;
+
 	@Autowired
 	private SeatRepo seatRepo;
 
@@ -100,11 +105,6 @@ public class BookingServiceimp implements BookingService {
 
 		Booking saved = bookingRepo.save(booking);
 
-//		TrainRoute fromRoute = trainRouteRepo.findByTrainIdAndStationName(train.getId(), saved.getFromStation())
-//				.orElseThrow(() -> new RuntimeException("Invalid fromStation"));
-//		TrainRoute toRoute = trainRouteRepo.findByTrainIdAndStationName(train.getId(), saved.getToStation())
-//				.orElseThrow(() -> new RuntimeException("Invalid toStation"));
-
 		BookingResponse response = new BookingResponse();
 
 		response.setBookingId(saved.getId());
@@ -139,17 +139,14 @@ public class BookingServiceimp implements BookingService {
 				.orElseThrow(() -> new RuntimeException("Booking id not found :_" + bookingId));
 
 		double totalfare = faresServiceimp.calculateFare(existbooking.getId());
-		
-		
-		
+
 		existbooking.setTotalFare(totalfare);
 //		existbooking.setBookingStatus("CONFIRMED");
 		Train train = existbooking.getTrain();
-	    bookingRepo.save(existbooking);
-		
+		bookingRepo.save(existbooking);
+
 		BookingResponse response = new BookingResponse();
-		
-		
+
 		response.setBookingId(existbooking.getId());
 		response.setPassengerName(existbooking.getPassengerName());
 		response.setPassengerAge(existbooking.getPassengerAge());
@@ -170,5 +167,76 @@ public class BookingServiceimp implements BookingService {
 		return response;
 
 	}
+
+	@Override
+	public Map<String, Object> bookinggetById(Long bookingId) {
+		if (bookingId == null) {
+			throw new RuntimeException("Booking not found : " + bookingId);
+		}
+
+		Map<String, Object> response = new HashMap<>();
+		Booking booking = bookingRepo.findById(bookingId)
+				.orElseThrow(() -> new RuntimeException("Booking not found for ID: " + bookingId));
+
+		response.put("success", true);
+		response.put("message", "Booking fetched successfully!");
+		response.put("bookingId", bookingId);
+		response.put("Booking_Data", booking);
+		return response;
+
+	}
+
+	@Transactional
+	@Override
+	public Map<String, Object> deletebookinggetById(Long bookingId) {
+
+		if (bookingId == null) {
+			throw new RuntimeException("Booking not found : " + bookingId);
+		}
+		Map<String, Object> response = new HashMap<>();
+		Booking booking = bookingRepo.findById(bookingId)
+				.orElseThrow(() -> new RuntimeException("Booking not found for ID: " + bookingId));
+
+		bookingRepo.delete(booking);
+		response.put("success", true);
+		response.put("message", "Booking deleted successfully!");
+		response.put("bookingId", bookingId);
+		response.put("Booking_Data", booking);
+		return response;
+	}
+
+	@Transactional
+	@Override
+	public Map<String, Object> cancelBooking(Long bookingId,  String userEmail) {
+
+		Users users = userRepo.findByEmail(userEmail);
+		if (users == null) {
+			throw new RuntimeException("User is not found");
+		}
+		
+		Map<String, Object> response = new HashMap<>();
+		Booking booking = bookingRepo.findById(bookingId)
+				.orElseThrow(() -> new RuntimeException("Booking not found for ID: " + bookingId));
+		booking.setBookingStatus("CANCELLED");
+		booking.setUpdatedBy(users);
+	bookingRepo.saveAndFlush(booking); // <-- इसे बदलें
+
+		
+		  BookingResponse dto = new BookingResponse();
+		    dto.setBookingId(booking.getId());
+		    dto.setPassengerName(booking.getPassengerName());
+//		    dto.setUserEmail(users.getEmail());
+		    
+		
+		response.put("success", true);
+		response.put("message", "Booking cancelBooking successfully!");
+		response.put("Booking_Data", dto.getBookingId());
+		return response;
+		
+	
+
+	}
+
+	
 
 }

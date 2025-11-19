@@ -1,12 +1,10 @@
 package com.railconnect.Serviceimp;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Service;
 
 import com.railconnect.entities.Coach;
@@ -22,7 +20,7 @@ import jakarta.transaction.Transactional;
 @Service
 public class CoachServiceimp implements CoachService {
 
-	private final AccessDeniedHandler accessDeniedHandler;
+//	private final AccessDeniedHandler accessDeniedHandler;
 
 	@Autowired
 	private CoachRepo coachRepo;
@@ -33,9 +31,9 @@ public class CoachServiceimp implements CoachService {
 	@Autowired
 	private SeatRepo seatRepo;
 
-	CoachServiceimp(AccessDeniedHandler accessDeniedHandler) {
-		this.accessDeniedHandler = accessDeniedHandler;
-	}
+//	CoachServiceimp(AccessDeniedHandler accessDeniedHandler) {
+//		this.accessDeniedHandler = accessDeniedHandler;
+//	}
 
 	@Transactional
 	@Override

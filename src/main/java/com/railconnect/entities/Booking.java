@@ -68,7 +68,7 @@ public class Booking {
 
 	// Booking Date
 	@NotNull(message = "Booking date is required")
-	@FutureOrPresent(message = "Booking date cannot be in the past")
+//	@FutureOrPresent(message = "Booking date cannot be in the past")
 	private LocalDate bookingDate;
 
 	@NotNull(message = "Total fare is required")
@@ -85,7 +85,7 @@ public class Booking {
 	private LocalDateTime createdAt;
 
 	@OneToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "updated_By")
+	@JoinColumn(name = "updated_By", nullable = true)
 	private Users updatedBy;
 
 	@LastModifiedDate
@@ -99,14 +99,12 @@ public class Booking {
 
 	@ManyToOne
 	@JoinColumn(name = "coach_id", nullable = false)
-//	@JsonBackReference
 	@JsonBackReference(value = "coach-bookings")
 	private Coach coach;
 
 	// Booking ↔ Seats (One booking has many seats)
 	@OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
 	@Size(min = 1, message = "At least one seat must be booked")
-//	@JsonBackReference
 	@JsonManagedReference(value = "booking-seats")
 	private List<Seat> seats = new ArrayList<>();
 
